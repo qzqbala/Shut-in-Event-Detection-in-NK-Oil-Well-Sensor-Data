@@ -1,4 +1,4 @@
 approach,load_s,memory_mb,file_mb
-"CSV, default dtypes (baseline)",0.292,24.54,15.84
-"CSV, chunksize + optimised dtypes",0.272,3.93,15.84
-Parquet (snappy),0.033,3.93,1.128
+"CSV, default dtypes (baseline)",0.034,24.54,15.84
+"CSV, chunksize + optimised dtypes",0.043,3.93,15.84
+Parquet (snappy),0.05,3.93,1.128

@@ -1,10 +1,12 @@
 """Cleaning and reshaping: masking impossible values, long -> wide pivot,
-full hourly grid, dynamometer_area scale normalisation, NK-7 regime label."""
+full hourly grid, dynamometer_area scale normalisation, NK-7 regime label,
+partial-hour downtime and cycling regime (see downtime.py)."""
 import numpy as np
 import pandas as pd
 
 from .config import (AREA_SHIFT_FACTOR, FOUNTAIN_PARAMS, MASK_FLAGS, NK7_REGIME_START,
                      NK7_WELL, SRP_PARAMS)
+from .downtime import add_partial_downtime
 
 
 def mask_flagged_values(df: pd.DataFrame) -> pd.DataFrame:
@@ -109,6 +111,7 @@ def build_hourly_table(long_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
     grid = add_full_hour_grid(wide)
     grid = add_regime(grid)
     grid = normalize_area(grid, shifts)
+    grid = add_partial_downtime(grid)
     grid["hour"] = grid["timestamp"].dt.hour
     grid["month"] = grid["timestamp"].dt.to_period("M").astype(str)
     return grid, shifts

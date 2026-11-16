@@ -56,8 +56,9 @@ def event_stats(events: pd.DataFrame, grid: pd.DataFrame, method: str = "referen
     """Frequency and duration of shut-ins per well."""
     ev = events[events["method"] == method]
     hours = grid.groupby("well_id")["has_data"].sum().rename("hours_with_data")
-    s = ev.groupby(["well_type", "well_id"])["duration_h"].agg(
-        n_events="count", total_h="sum", mean_h="mean", median_h="median", max_h="max").reset_index()
+    s = ev.groupby(["well_type", "well_id"]).agg(
+        n_events=("duration_h", "count"), total_h=("shut_in_h", "sum"), mean_h=("duration_h", "mean"),
+        median_h=("duration_h", "median"), max_h=("duration_h", "max")).reset_index()
     s = s.merge(hours.reset_index(), on="well_id", how="right")
     s["well_type"] = s["well_type"].fillna(
         s["well_id"].map(grid.drop_duplicates("well_id").set_index("well_id")["well_type"]))
@@ -80,5 +81,5 @@ def monthly_events(events: pd.DataFrame, method: str = "reference") -> pd.DataFr
     ev = events[events["method"] == method].copy()
     ev["month"] = ev["start_ts"].dt.to_period("M").astype(str)
     return (ev.groupby(["month", "well_type"]).agg(n_events=("event_id", "count"),
-                                                  downtime_h=("duration_h", "sum"))
+                                                  downtime_h=("shut_in_h", "sum"))
               .reset_index())

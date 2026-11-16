@@ -71,15 +71,17 @@ def load_hourly_wide(con, grid: pd.DataFrame) -> None:
     w = grid.rename(columns={"timestamp": "ts", "SPM": "spm"})
     cols = ["well_id", "ts", "split", "has_data", "regime", "tubing_pressure", "casing_pressure",
             "line_pressure", "spm", "pump_fillage", "min_rod_weight", "max_rod_weight",
-            "dynamometer_area", "area_norm"]
+            "dynamometer_area", "area_norm", "run_frac", "est_down_h", "cycling"]
     w = w[cols].copy()
     w["ts"] = _ts(w["ts"])
     w["has_data"] = w["has_data"].astype(int)
+    w["cycling"] = w["cycling"].astype(int)
     w.to_sql("hourly_wide", con, if_exists="append", index=False, chunksize=20_000)
 
 
 def load_events(con, events: pd.DataFrame) -> None:
-    e = events[["event_id", "well_id", "method", "start_ts", "end_ts", "duration_h", "split"]].copy()
+    e = events[["event_id", "well_id", "method", "start_ts", "end_ts", "duration_h", "shut_in_h",
+                "split"]].copy()
     e["start_ts"] = _ts(e["start_ts"])
     e["end_ts"] = _ts(e["end_ts"])
     con.execute("DELETE FROM shut_in_events")

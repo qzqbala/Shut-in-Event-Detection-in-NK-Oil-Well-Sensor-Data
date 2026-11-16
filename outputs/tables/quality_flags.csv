@@ -12,8 +12,8 @@ NK-86,min_rod_weight,weight_overflow,14
 NK-7,dynamometer_area,area_extreme;area_negative,8
 NK-93,dynamometer_area,area_negative,5
 NK-77,dynamometer_area,area_negative,3
-NK-7,SPM,spm_outlier,1
-NK-82,SPM,spm_outlier,1
-NK-82,dynamometer_area,area_extreme,1
 NK-91,dynamometer_area,area_negative,1
+NK-7,SPM,spm_outlier,1
+NK-82,dynamometer_area,area_extreme,1
+NK-82,SPM,spm_outlier,1
 NK-93,max_rod_weight,weight_overflow,1

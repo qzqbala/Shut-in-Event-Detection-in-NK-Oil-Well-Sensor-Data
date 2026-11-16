@@ -50,7 +50,7 @@ sel = events[(events["well_id"] == well) & (events["method"] == method)
 g = grid[(grid["well_id"] == well) & grid["timestamp"].between(pd.Timestamp(start), end_ts)]
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Shut-in events", len(sel))
-k2.metric("Downtime, h", int(sel["duration_h"].sum()))
+k2.metric("Downtime, h", int(sel["shut_in_h"].sum()))
 k3.metric("Mean duration, h", f"{sel['duration_h'].mean():.1f}" if len(sel) else "—")
 k4.metric("Hours without data", int((~g["has_data"].astype(bool)).sum()))
 
@@ -60,7 +60,7 @@ st.plotly_chart(viz.timeline(grid, events, well, param, start, end_ts, method),
 left, right = st.columns([1.1, 1])
 with left:
     st.subheader("Events in the period")
-    st.dataframe(sel[["event_id", "start_ts", "end_ts", "duration_h", "split"]],
+    st.dataframe(sel[["event_id", "start_ts", "end_ts", "duration_h", "shut_in_h", "split"]],
                  hide_index=True, width="stretch")
 with right:
     st.subheader("Method comparison (test split)")

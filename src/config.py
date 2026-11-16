@@ -46,8 +46,21 @@ NK7_REGIME_START = "2026-06-09"          # data-driven: daily SPM median drops t
 AREA_SHIFT_FACTOR = 5.0                   # daily median / pre-period median that marks the scale shift
 
 # Reference ("silver") label thresholds
-ZERO_EPS = 1e-9          # SRP: hourly mean exactly 0 => every raw record was 0
-PRESSURE_OFF_ATM = 0.5   # fountain: all pressures below this => well closed / depressurised
+ZERO_EPS = 1e-9          # SRP: hourly mean SPM exactly 0 => every raw record of the hour was 0
+PRESSURE_OFF_ATM = 0.5   # fountain: tubing (and line, when reported) below this => no flow
+
+# Event building: shut-in runs separated by <= this many hours of operation form one event
+# (a short restart attempt inside a shut-in is not a new shut-in)
+EVENT_MERGE_GAP_H = 3
+
+# Partial-hour downtime (SRP). Values are hourly MEANS of ~10-min records, so a pump that stops
+# for part of an hour shows a reduced SPM instead of 0. Running share = SPM / nominal speed.
+SPM_RUNNING_MIN = 1.0       # hours with SPM >= this count as running when estimating nominal speed
+NOMINAL_WINDOW = "72h"      # trailing window for the nominal-speed median
+NOMINAL_FALLBACK = "720h"   # wider window after long stops
+PARTIAL_FRAC = 0.90         # SPM / nominal below this => pump stopped for part of the hour
+STABLE_TOL = 0.05           # level within 5 % of both neighbours => new speed set-point, not a stop
+CYCLING_MIN_PARTIAL_H = 6   # well-day with >= this many partial hours => intermittent (cycling) operation
 
 # Detector settings
 BASELINE_SPM = 0.5          # strokes/min
