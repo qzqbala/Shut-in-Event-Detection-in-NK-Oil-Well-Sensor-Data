@@ -17,7 +17,8 @@ Dataset: [Arailym-tleubayeva/NK-Oil-Well-Sensor-Monitoring-v2](https://huggingfa
 ## Quick start
 
 ```bash
-git clone <repo-url> && cd nk_shutin
+git clone https://github.com/qzqbala/Shut-in-Event-Detection-in-NK-Oil-Well-Sensor-Data.git
+cd Shut-in-Event-Detection-in-NK-Oil-Well-Sensor-Data
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
@@ -119,11 +120,13 @@ discussion and limitations.
 
 ## Team contributions
 
-| Member | Main responsibility |
-|---|---|
-| Nikita Trubarov | *to be filled in by the team* |
-| Dulat Tulebaev | *to be filled in by the team* |
-| Nurdaulet Tastan | *to be filled in by the team* |
+| Member | Role | Main work |
+|---|---|---|
+| Nikita Trubarov | Data engineering | `data_loader.py` (chunked loading, dtype optimisation, Parquet, storage benchmark), `transform.py` (long → wide pivot, hourly grid, area normalisation, NK-7 regime), `quality.py` (data quality audit); report sections 2–3 |
+| Dulat Tulebaev | Methods and integration (team lead) | `detection.py` (reference labels, baseline / rule-based / GMM detectors, event table), `evaluation.py` (metrics, MAE, time and memory), `pipeline.py`, `main.py` console menu, GitHub repository and README; report sections 6–7 |
+| Nurdaulet Tastan | Database and visualisation | `sql/schema.sql`, `sql/queries.sql`, `database.py`, ER diagram, pandas-vs-SQL benchmark, `eda.py`, `viz.py` (8 figures), `app.py` Streamlit dashboard, presentation; report sections 4–5 |
+
+Every member reviewed the whole code base and can explain any module during the defense.
 
 ## Licence and attribution
 
