@@ -5,3 +5,4 @@ data/processed/
 outputs/session_state.json
 .streamlit/
 .DS_Store
+outputs/tables/search_*.csv

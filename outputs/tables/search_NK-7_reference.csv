@@ -1,4 +1,0 @@
-event_id,well_id,well_type,method,start_ts,end_ts,duration_h,split
-REF-00004,NK-7,sucker_rod_pump,reference,2026-05-09 15:00:00,2026-05-22 10:00:00,308,train
-REF-00007,NK-7,sucker_rod_pump,reference,2026-05-29 09:00:00,2026-05-31 07:00:00,47,train
-REF-00008,NK-7,sucker_rod_pump,reference,2026-05-31 17:00:00,2026-06-03 16:00:00,72,train
