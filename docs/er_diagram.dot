@@ -1,0 +1,70 @@
+digraph ER {
+  graph [rankdir=LR, fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.5, ranksep=0.9];
+  node  [shape=plain, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=9, color="#52514e", arrowhead=crow, arrowtail=tee, dir=both];
+
+  well_types [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#2a78d6"><font color="white"><b>well_types</b></font></td></tr>
+    <tr><td align="left"><u>well_type</u> TEXT PK</td></tr>
+    <tr><td align="left">description TEXT</td></tr></table>>];
+
+  wells [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#2a78d6"><font color="white"><b>wells</b></font></td></tr>
+    <tr><td align="left"><u>well_id</u> TEXT PK</td></tr>
+    <tr><td align="left">well_type TEXT FK</td></tr></table>>];
+
+  parameters [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#2a78d6"><font color="white"><b>parameters</b></font></td></tr>
+    <tr><td align="left"><u>parameter</u> TEXT PK</td></tr>
+    <tr><td align="left">unit TEXT</td></tr>
+    <tr><td align="left">well_type TEXT FK</td></tr></table>>];
+
+  measurements [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#eb6834"><font color="white"><b>measurements</b> (long, 258 387)</font></td></tr>
+    <tr><td align="left"><u>measurement_id</u> INTEGER PK</td></tr>
+    <tr><td align="left">well_id TEXT FK</td></tr>
+    <tr><td align="left">ts TEXT</td></tr>
+    <tr><td align="left">parameter TEXT FK</td></tr>
+    <tr><td align="left">value REAL</td></tr>
+    <tr><td align="left">n_obs INTEGER</td></tr>
+    <tr><td align="left">split TEXT</td></tr>
+    <tr><td align="left"><i>UNIQUE(well_id, ts, parameter)</i></td></tr></table>>];
+
+  measurement_flags [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#eb6834"><font color="white"><b>measurement_flags</b></font></td></tr>
+    <tr><td align="left"><u>measurement_id</u> INTEGER PK, FK</td></tr>
+    <tr><td align="left"><u>flag</u> TEXT PK</td></tr></table>>];
+
+  hourly_wide [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#1baf7a"><font color="white"><b>hourly_wide</b> (pivot, 65 520)</font></td></tr>
+    <tr><td align="left"><u>well_id</u> TEXT PK, FK</td></tr>
+    <tr><td align="left"><u>ts</u> TEXT PK</td></tr>
+    <tr><td align="left">split, has_data, regime</td></tr>
+    <tr><td align="left">tubing / casing / line_pressure</td></tr>
+    <tr><td align="left">spm, pump_fillage</td></tr>
+    <tr><td align="left">min / max_rod_weight</td></tr>
+    <tr><td align="left">dynamometer_area, area_norm</td></tr></table>>];
+
+  detection_methods [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#6250d6"><font color="white"><b>detection_methods</b></font></td></tr>
+    <tr><td align="left"><u>method</u> TEXT PK</td></tr>
+    <tr><td align="left">description TEXT</td></tr></table>>];
+
+  shut_in_events [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+    <tr><td bgcolor="#6250d6"><font color="white"><b>shut_in_events</b></font></td></tr>
+    <tr><td align="left"><u>event_id</u> TEXT PK</td></tr>
+    <tr><td align="left">well_id TEXT FK</td></tr>
+    <tr><td align="left">method TEXT FK</td></tr>
+    <tr><td align="left">start_ts, end_ts TEXT</td></tr>
+    <tr><td align="left">duration_h INTEGER</td></tr>
+    <tr><td align="left">split TEXT</td></tr></table>>];
+
+  well_types -> wells;
+  well_types -> parameters;
+  wells -> measurements;
+  parameters -> measurements;
+  measurements -> measurement_flags;
+  wells -> hourly_wide;
+  wells -> shut_in_events;
+  detection_methods -> shut_in_events;
+}

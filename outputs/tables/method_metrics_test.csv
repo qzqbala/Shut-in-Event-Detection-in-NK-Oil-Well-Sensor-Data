@@ -1,0 +1,4 @@
+method,hour_precision,hour_recall,hour_f1,tp,fp,fn,events_true,events_pred,event_precision,event_recall,event_f1,start_mae_h,duration_mae_h,fit_time_s,detect_time_s,peak_mem_mb
+baseline,0.8549,1.0,0.9218,271,46,0,36,117,0.2906,1.0,0.4503,1.6667,4.6389,0.0,0.007,5.6
+rule_based,0.915,0.9926,0.9522,269,25,2,36,58,0.5517,0.9444,0.6965,1.7059,4.8235,0.0,0.0996,3.84
+statistical,0.9731,0.9336,0.9529,253,7,18,36,22,0.6818,0.5278,0.595,9.0526,16.2632,0.487,0.164,5.94

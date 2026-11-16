@@ -1,0 +1,13 @@
+well_type,bucket,n_events
+fountain,1 h,18
+fountain,2-3 h,20
+fountain,4-12 h,23
+fountain,13-24 h,7
+fountain,1-3 days,7
+fountain,> 3 days,4
+sucker_rod_pump,1 h,29
+sucker_rod_pump,2-3 h,11
+sucker_rod_pump,4-12 h,24
+sucker_rod_pump,13-24 h,4
+sucker_rod_pump,1-3 days,6
+sucker_rod_pump,> 3 days,4

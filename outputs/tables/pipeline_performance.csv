@@ -1,0 +1,8 @@
+step,time_s,peak_mem_mb
+load,1.6123,21.56
+transform,0.7807,30.64
+audit,0.2288,17.01
+detect,2.5439,
+database,12.6928,93.34
+eda,0.3951,13.18
+figures,19.993,48.09

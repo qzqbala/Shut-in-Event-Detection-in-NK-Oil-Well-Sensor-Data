@@ -1,0 +1,9 @@
+method,split,n_events,downtime_h,mean_duration_h
+baseline,test,117,387,3.3
+reference,test,36,271,7.5
+rule_based,test,58,323,5.6
+statistical,test,22,294,13.4
+baseline,train,174,2414,13.9
+reference,train,121,2218,18.3
+rule_based,train,118,2357,20.0
+statistical,train,60,1965,32.8

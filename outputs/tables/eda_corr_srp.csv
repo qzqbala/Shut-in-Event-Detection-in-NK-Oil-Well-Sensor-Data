@@ -1,0 +1,6 @@
+index,SPM,pump_fillage,min_rod_weight,max_rod_weight,area_norm
+SPM,1.0,-0.128,-0.201,0.297,0.222
+pump_fillage,-0.128,1.0,-0.535,0.589,0.131
+min_rod_weight,-0.201,-0.535,1.0,-0.63,-0.36
+max_rod_weight,0.297,0.589,-0.63,1.0,0.314
+area_norm,0.222,0.131,-0.36,0.314,1.0

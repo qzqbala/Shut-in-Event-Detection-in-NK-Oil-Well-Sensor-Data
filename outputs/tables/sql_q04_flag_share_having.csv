@@ -1,0 +1,6 @@
+well_id,parameter,n_rows,n_flagged,flagged_pct,flags
+NK-7,dynamometer_area,5561,2789,50.15,"area_negative,area_extreme"
+NK-7,max_rod_weight,6421,2589,40.32,weight_overflow
+NK-7,min_rod_weight,6421,1357,21.13,weight_overflow
+NK-86,dynamometer_area,5961,180,3.02,"area_negative,area_extreme"
+NK-86,max_rod_weight,6106,107,1.75,weight_overflow

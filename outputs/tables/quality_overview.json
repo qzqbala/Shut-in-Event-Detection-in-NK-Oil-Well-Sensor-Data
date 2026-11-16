@@ -1,0 +1,11 @@
+{
+  "rows_long": 258387,
+  "wells": 10,
+  "parameters": 8,
+  "period_start": "2026-01-01 00:00:00",
+  "period_end": "2026-09-30 23:00:00",
+  "rows_train": 206706,
+  "rows_test": 51681,
+  "duplicate_rows": 0,
+  "null_values": 0
+}
