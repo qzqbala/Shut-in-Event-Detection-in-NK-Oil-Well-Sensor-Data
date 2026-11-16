@@ -118,8 +118,8 @@ def action_search(s: Session):
     if ev.empty:
         print("No events found.")
     else:
-        print(ev[["event_id", "start_ts", "end_ts", "duration_h", "split"]].to_string(index=False))
-        print(f"\n{len(ev)} events, total {ev['duration_h'].sum()} h, "
+        print(ev[["event_id", "start_ts", "end_ts", "duration_h", "shut_in_h", "split"]].to_string(index=False))
+        print(f"\n{len(ev)} events, total downtime {ev['shut_in_h'].sum()} h, "
               f"mean {ev['duration_h'].mean():.1f} h")
         out = DATA_PROCESSED.parent.parent / "outputs" / "tables" / f"search_{well}_{method}.csv"
         ev.to_csv(out, index=False)

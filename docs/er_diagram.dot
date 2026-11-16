@@ -43,7 +43,8 @@ digraph ER {
     <tr><td align="left">tubing / casing / line_pressure</td></tr>
     <tr><td align="left">spm, pump_fillage</td></tr>
     <tr><td align="left">min / max_rod_weight</td></tr>
-    <tr><td align="left">dynamometer_area, area_norm</td></tr></table>>];
+    <tr><td align="left">dynamometer_area, area_norm</td></tr>
+    <tr><td align="left">run_frac, est_down_h, cycling</td></tr></table>>];
 
   detection_methods [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5">
     <tr><td bgcolor="#6250d6"><font color="white"><b>detection_methods</b></font></td></tr>
@@ -57,6 +58,7 @@ digraph ER {
     <tr><td align="left">method TEXT FK</td></tr>
     <tr><td align="left">start_ts, end_ts TEXT</td></tr>
     <tr><td align="left">duration_h INTEGER</td></tr>
+    <tr><td align="left">shut_in_h INTEGER</td></tr>
     <tr><td align="left">split TEXT</td></tr></table>>];
 
   well_types -> wells;

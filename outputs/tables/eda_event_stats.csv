@@ -1,11 +1,11 @@
 well_type,well_id,n_events,total_h,mean_h,median_h,max_h,hours_with_data,events_per_30d,downtime_pct
-fountain,NK-75,54,882,16.33,4.0,255,6466,6.01,13.64
+fountain,NK-75,21,893,44.81,14.0,256,6466,2.34,13.81
 fountain,NK-76,3,40,13.33,13.0,20,6461,0.33,0.62
-fountain,NK-83,22,287,13.05,3.0,53,6462,2.45,4.44
+fountain,NK-83,15,383,27.2,6.0,98,6462,1.67,5.93
 sucker_rod_pump,NK-68,3,13,4.33,2.0,10,6395,0.34,0.2
-sucker_rod_pump,NK-7,23,520,22.61,5.0,308,6421,2.58,8.1
+sucker_rod_pump,NK-7,22,520,23.68,5.0,308,6421,2.47,8.1
 sucker_rod_pump,NK-77,3,4,1.33,1.0,2,6431,0.34,0.06
-sucker_rod_pump,NK-82,20,343,17.15,3.5,170,6365,2.26,5.39
+sucker_rod_pump,NK-82,25,355,14.48,1.0,170,6365,2.83,5.58
 sucker_rod_pump,NK-86,7,13,1.86,1.0,5,6106,0.83,0.21
 sucker_rod_pump,NK-91,10,170,17.0,8.5,76,5976,1.2,2.84
-sucker_rod_pump,NK-93,12,217,18.08,1.5,144,6387,1.35,3.4
+sucker_rod_pump,NK-93,23,234,10.43,1.0,194,6387,2.59,3.66

@@ -1,7 +1,7 @@
 well_type,method,hour_precision,hour_recall,hour_f1
-fountain,baseline,0.9912,1.0,0.9956
-fountain,rule_based,0.9956,0.9912,0.9933
-fountain,statistical,0.9867,0.9867,0.9867
-sucker_rod_pump,baseline,0.5056,1.0,0.6716
-sucker_rod_pump,rule_based,0.6522,1.0,0.7895
-sucker_rod_pump,statistical,0.8824,0.6667,0.7595
+fountain,baseline,0.992,1.0,0.996
+fountain,rule_based,0.9959,0.9879,0.9919
+fountain,statistical,0.9569,0.9839,0.9702
+sucker_rod_pump,baseline,0.4526,1.0,0.6231
+sucker_rod_pump,rule_based,0.8158,1.0,0.8986
+sucker_rod_pump,statistical,0.8718,0.5484,0.6733

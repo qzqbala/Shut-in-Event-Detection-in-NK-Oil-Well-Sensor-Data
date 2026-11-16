@@ -55,6 +55,9 @@ CREATE TABLE hourly_wide (
     tubing_pressure  REAL, casing_pressure REAL, line_pressure REAL,
     spm              REAL, pump_fillage REAL, min_rod_weight REAL, max_rod_weight REAL,
     dynamometer_area REAL, area_norm REAL,
+    run_frac         REAL,                    -- SRP: share of the hour the pump ran (SPM / nominal)
+    est_down_h       REAL,                    -- SRP: estimated stopped time within the hour
+    cycling          INTEGER,                 -- SRP: well-day in intermittent (cycling) operation
     PRIMARY KEY (well_id, ts)
 );
 
@@ -69,7 +72,8 @@ CREATE TABLE shut_in_events (
     method        TEXT NOT NULL REFERENCES detection_methods(method),
     start_ts      TEXT NOT NULL,
     end_ts        TEXT NOT NULL,
-    duration_h    INTEGER NOT NULL CHECK (duration_h >= 1),
+    duration_h    INTEGER NOT NULL CHECK (duration_h >= 1),   -- first to last shut-in hour
+    shut_in_h     INTEGER NOT NULL CHECK (shut_in_h BETWEEN 1 AND duration_h),  -- shut-in hours (downtime)
     split         TEXT NOT NULL
 );
 

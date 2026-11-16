@@ -115,7 +115,7 @@ SELECT e.well_id,
        w.well_type,
        substr(e.start_ts, 1, 7)       AS month,
        COUNT(*)                       AS n_events,
-       SUM(e.duration_h)              AS downtime_h,
+       SUM(e.shut_in_h)               AS downtime_h,
        ROUND(AVG(e.duration_h), 1)    AS mean_duration_h,
        MAX(e.duration_h)              AS max_duration_h
 FROM shut_in_events e
@@ -149,7 +149,7 @@ SELECT d.well_id,
        ROUND(100.0 * (d.hours_with_data - COALESCE(e.shut_in_hours, 0)) / d.hours_with_data, 2)
            AS availability_pct
 FROM (SELECT well_id, SUM(has_data) AS hours_with_data FROM hourly_wide GROUP BY well_id) d
-LEFT JOIN (SELECT well_id, SUM(duration_h) AS shut_in_hours
+LEFT JOIN (SELECT well_id, SUM(shut_in_h) AS shut_in_hours
            FROM shut_in_events WHERE method = 'reference' GROUP BY well_id) e
        ON e.well_id = d.well_id
 ORDER BY availability_pct;
@@ -181,7 +181,7 @@ ORDER BY sharp_drops DESC;
 SELECT dm.method,
        e.split,
        COUNT(e.event_id)            AS n_events,
-       SUM(e.duration_h)            AS downtime_h,
+       SUM(e.shut_in_h)             AS downtime_h,
        ROUND(AVG(e.duration_h), 1)  AS mean_duration_h
 FROM detection_methods dm
 LEFT JOIN shut_in_events e ON e.method = dm.method
@@ -198,3 +198,19 @@ JOIN wells w ON w.well_id = e.well_id
 WHERE e.method = 'reference'
 GROUP BY w.well_type, start_hour
 ORDER BY w.well_type, start_hour;
+
+-- name: q14_partial_downtime
+-- desc: SRP downtime incl. partial hours (CASE + GROUP BY): full stops, stopped share of partial hours, cycling days, availability
+SELECT h.well_id,
+       SUM(h.has_data)                                                          AS hours_with_data,
+       SUM(CASE WHEN h.run_frac = 0 THEN 1 ELSE 0 END)                           AS full_stop_h,
+       SUM(CASE WHEN h.run_frac > 0 AND h.est_down_h > 0 THEN 1 ELSE 0 END)      AS partial_hours,
+       ROUND(SUM(CASE WHEN h.run_frac > 0 THEN h.est_down_h ELSE 0 END), 1)      AS partial_down_h,
+       ROUND(SUM(h.est_down_h), 1)                                               AS est_down_h,
+       COUNT(DISTINCT CASE WHEN h.cycling = 1 THEN substr(h.ts, 1, 10) END)      AS cycling_days,
+       ROUND(100.0 * (1 - SUM(h.est_down_h) / SUM(h.has_data)), 2)               AS availability_pct
+FROM hourly_wide h
+JOIN wells w ON w.well_id = h.well_id
+WHERE w.well_type = 'sucker_rod_pump'
+GROUP BY h.well_id
+ORDER BY availability_pct;

@@ -1,11 +1,16 @@
 """Shut-in detection.
 
 There are no verified shut-in labels in the dataset, so a REFERENCE ("silver standard")
-is built from a strict multi-sensor consensus that detectors are not given in full:
-  * sucker-rod pump: SPM hourly mean == 0 AND rod-weight hourly mean == 0
-    (every raw record of the hour shows a stopped, unloaded rod string);
-  * fountain: tubing AND line pressure < 0.5 atm (no flow along the flow path;
-    casing/annulus pressure usually stays high during a surface shut-in).
+is built from the strictest signal available:
+  * sucker-rod pump: SPM hourly mean == 0, i.e. every raw record of the hour shows no strokes.
+    Rod weight is NOT required to be 0: a stopped pump still carries the hanging rod string,
+    and in the intermittent regime of NK-82 / NK-93 the controller keeps reporting that static
+    load (~8,500-9,000 kg) during idle hours. Requiring weight == 0 labelled those real stops
+    as "running" and penalised detectors that found them.
+  * fountain: tubing pressure < 0.5 atm AND line pressure < 0.5 atm or not reported
+    (no flow along the flow path; casing/annulus pressure usually stays high during a
+    surface shut-in). Line pressure is missing for long periods (NK-83 from April, NK-75
+    from late June), so requiring it left fully depressurised hours unevaluated.
 
 Detectors only see the primary signal (SPM / tubing pressure) plus secondary signals
 that are NOT part of the reference (pump fillage, casing pressure):
@@ -21,7 +26,7 @@ import numpy as np
 import pandas as pd
 from sklearn.mixture import GaussianMixture
 
-from .config import (BASELINE_PRESSURE, BASELINE_SPM, FOUNTAIN, PRESSURE_OFF_ATM,
+from .config import (BASELINE_PRESSURE, BASELINE_SPM, EVENT_MERGE_GAP_H, FOUNTAIN, PRESSURE_OFF_ATM,
                      PRIMARY_SIGNAL, RANDOM_STATE, RULE_FILLAGE_MAX, RULE_MERGE_GAP_H,
                      RULE_PRIMARY_MAX, SRP, STAT_COMPONENTS, STAT_LOW_MEAN,
                      STAT_SMOOTH_H, ZERO_EPS)
@@ -47,15 +52,13 @@ def make_labels(grid: pd.DataFrame) -> pd.Series:
     """1 = shut-in, 0 = running, NaN = not evaluable (no data / sensors missing)."""
     label = pd.Series(np.nan, index=grid.index, dtype="float64")
 
-    weight = grid["max_rod_weight"].fillna(grid["min_rod_weight"])
-    srp = ((grid["well_type"] == SRP) & grid["has_data"]
-           & grid["SPM"].notna() & weight.notna())
-    stopped = (grid["SPM"].abs() <= ZERO_EPS) & (weight.abs() <= ZERO_EPS)
+    srp = (grid["well_type"] == SRP) & grid["has_data"] & grid["SPM"].notna()
+    stopped = grid["SPM"].abs() <= ZERO_EPS
     label[srp] = stopped[srp].astype(float)
 
-    fnt = ((grid["well_type"] == FOUNTAIN) & grid["has_data"]
-           & grid["tubing_pressure"].notna() & grid["line_pressure"].notna())
-    off = (grid["tubing_pressure"] < PRESSURE_OFF_ATM) & (grid["line_pressure"] < PRESSURE_OFF_ATM)
+    fnt = (grid["well_type"] == FOUNTAIN) & grid["has_data"] & grid["tubing_pressure"].notna()
+    line = grid["line_pressure"]
+    off = (grid["tubing_pressure"] < PRESSURE_OFF_ATM) & (line.isna() | (line < PRESSURE_OFF_ATM))
     label[fnt] = off[fnt].astype(float)
     return label
 
@@ -160,8 +163,13 @@ METHODS = {
 
 
 # ---------------------------------------------------------------- events
-def hours_to_events(grid: pd.DataFrame, flags: pd.Series, method: str) -> pd.DataFrame:
-    """Collapse consecutive shut-in hours of a well into events (one row per event)."""
+def hours_to_events(grid: pd.DataFrame, flags: pd.Series, method: str,
+                    merge_gap_h: int = EVENT_MERGE_GAP_H) -> pd.DataFrame:
+    """Collapse shut-in hours of a well into events (one row per event).
+    Runs separated by at most `merge_gap_h` non-shut-in hours are merged into one event, so a
+    brief restart attempt does not split one shut-in into several.
+    duration_h = hours from first to last shut-in hour (restart hours included);
+    shut_in_h  = shut-in hours inside the event (use this for downtime sums)."""
     rows = []
     d = grid[["well_id", "well_type", "timestamp", "split"]].copy()
     d["f"] = flags.astype(bool).to_numpy()
@@ -170,12 +178,19 @@ def hours_to_events(grid: pd.DataFrame, flags: pd.Series, method: str) -> pd.Dat
         ts = g["timestamp"].to_numpy()
         starts = np.flatnonzero(f & ~np.r_[False, f[:-1]])
         ends = np.flatnonzero(f & ~np.r_[f[1:], False])
+        runs = []
         for s, e in zip(starts, ends):
+            if runs and s - runs[-1][1] - 1 <= merge_gap_h:
+                runs[-1][1] = e
+            else:
+                runs.append([s, e])
+        for s, e in runs:
             rows.append({"well_id": well, "well_type": g["well_type"].iloc[s], "method": method,
                          "start_ts": pd.Timestamp(ts[s]), "end_ts": pd.Timestamp(ts[e]),
-                         "duration_h": int(e - s + 1), "split": g["split"].iloc[s]})
+                         "duration_h": int(e - s + 1), "shut_in_h": int(f[s:e + 1].sum()),
+                         "split": g["split"].iloc[s]})
     ev = pd.DataFrame(rows, columns=["well_id", "well_type", "method", "start_ts", "end_ts",
-                                     "duration_h", "split"])
+                                     "duration_h", "shut_in_h", "split"])
     ev.insert(0, "event_id", [f"{method[:3].upper()}-{i:05d}" for i in range(len(ev))])
     return ev
 

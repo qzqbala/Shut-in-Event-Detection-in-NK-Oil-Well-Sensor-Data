@@ -42,7 +42,7 @@ Tested on Python 3.13 with pandas 3.0.5 and pandas 2.2.3; both give identical re
 | 1 | Load data: chunked CSV → optimised dtypes → Parquet |
 | 2 | Data quality audit (missing hours/parameters, flags, outages, known issues) |
 | 3 | Run the three detectors, compare metrics (fit on train, evaluate on test) |
-| 4 | Build the SQLite database and run the 13 SQL queries |
+| 4 | Build the SQLite database and run the 14 SQL queries |
 | 5 | Search shut-in events of a well (by method and minimum duration) → CSV |
 | 6 | EDA summary by well type |
 | 7 | Build figures (interactive HTML + PNG) |
@@ -61,6 +61,7 @@ nk_shutin/
 │   ├── config.py           paths, constants, thresholds
 │   ├── data_loader.py      download, chunked CSV reading, dtype optimisation, Parquet, storage benchmark
 │   ├── transform.py        masking flagged values, long→wide pivot, hourly grid, area scale fix, NK-7 regime
+│   ├── downtime.py         partial-hour downtime of pump wells (SPM / nominal speed), cycling regime
 │   ├── quality.py          data quality audit
 │   ├── detection.py        reference labels, baseline / rule-based / statistical detectors, event table
 │   ├── evaluation.py       hour- and event-level metrics, MAE, time and memory
@@ -71,7 +72,7 @@ nk_shutin/
 │   └── utils.py            time/memory measurement, JSON state
 ├── sql/
 │   ├── schema.sql          normalised schema (8 tables)
-│   └── queries.sql         13 analysis queries (JOIN, GROUP BY/HAVING, subqueries, CTE, LAG, RANK, window frames)
+│   └── queries.sql         14 analysis queries (JOIN, GROUP BY/HAVING, subqueries, CTE, LAG, RANK, window frames)
 ├── docs/er_diagram.png     ER diagram (source: er_diagram.dot)
 ├── data/raw/               train.csv, test.csv
 ├── data/processed/         Parquet files + nk_wells.db (generated)
@@ -83,9 +84,12 @@ nk_shutin/
 ## Method in one paragraph
 
 The dataset has no verified shut-in labels. We therefore build a **reference (silver
-standard)** from a multi-sensor consensus that the detectors cannot fully see:
-- **Sucker-rod pump:** SPM and rod weight are both exactly 0 for the whole hour.
-- **Fountain well:** tubing and line pressure are both below 0.5 atm.
+standard)** from the strictest signal available:
+- **Sucker-rod pump:** SPM is exactly 0 for the whole hour (every raw record shows no strokes).
+  Rod weight is not required to be 0: a stopped pump still carries the hanging rod string,
+  and NK-82 / NK-93 keep reporting that static load while idle.
+- **Fountain well:** tubing pressure below 0.5 atm, and line pressure below 0.5 atm or not
+  reported (line pressure is missing for long periods on NK-83 and NK-75).
 
 The detectors use only the primary signal (SPM or tubing pressure) and one secondary
 signal: pump fillage for pump wells, casing pressure for fountain wells. All three run on
@@ -97,6 +101,15 @@ the same data:
 - **Statistical:** a Gaussian mixture with 3 components per well and regime, fitted on
   the train split only, followed by smoothing.
 
+For the reference and every detector, shut-in hours separated by at most 3 hours of
+operation form **one event** (a short restart attempt is not a new shut-in).
+`duration_h` is the event length; `shut_in_h` is the downtime inside it.
+
+Values are hourly means of ~10-minute records, so a pump that stops for part of an hour
+shows a reduced SPM, not 0. `downtime.py` estimates the stopped share of each pump-well hour
+(1 − SPM / nominal speed) and flags days with intermittent (cycling) operation; query
+`q14_partial_downtime` reports availability including this partial-hour downtime.
+
 Evaluation uses the test split (2026-08-08 23:00 onward) and reports:
 - hour-level precision, recall and F1;
 - event-level precision, recall and F1;
@@ -107,13 +120,19 @@ Evaluation uses the test split (2026-08-08 23:00 onward) and reports:
 
 | Method | Hour F1 | Event precision | Event recall | Event F1 | Duration MAE, h | Detect time, s |
 |---|---|---|---|---|---|---|
-| Baseline | 0.922 | 0.291 | 1.000 | 0.450 | 4.6 | 0.01 |
-| Rule-based | 0.952 | 0.552 | 0.944 | **0.697** | 4.8 | 0.10 |
-| Statistical (GMM) | **0.953** | **0.682** | 0.528 | 0.595 | 16.3 | 0.16 |
+| Baseline | 0.890 | 0.462 | **1.000** | 0.632 | **0.16** | 0.01 |
+| Rule-based | **0.972** | 0.840 | 0.977 | **0.903** | 0.19 | 0.04 |
+| Statistical (GMM) | 0.921 | **0.842** | 0.372 | 0.516 | 0.63 | 0.06 |
 
-The rule-based detector gives the best event-level F1. The baseline breaks one real
-shut-in into many short events and also fires on single noisy hours. The GMM has the
-highest precision, but the 3-hour smoothing makes it miss 1-hour shut-ins.
+The rule-based detector gives the best hour- and event-level F1. The baseline also fires
+on hours where the pump ran only briefly (SPM < 0.5) and on single noisy hours. The GMM
+is as precise as the rules but misses most 1-hour stops: its 3-hour smoothing removes
+them, and the test period is dominated by the short stops of the NK-82 / NK-93 cycling
+regime.
+
+Partial-hour downtime matters: for NK-7, NK-82 and NK-93 the stopped share of partial
+hours (370–560 h per well) is as large as the full shut-in downtime, so availability drops
+to 83–90 % (q14) instead of 92–96 % from shut-ins alone (q10).
 
 Full tables are in `outputs/tables/`. The written report and the slide deck have the
 discussion and limitations.
