@@ -1,3 +1,3 @@
 approach,time_s,groups,results_match
-"SQL (SQLite, GROUP BY)",0.0973,384,True
-pandas groupby (in memory),0.0056,384,True
+"SQL (SQLite, GROUP BY)",0.1996,384,True
+pandas groupby (in memory),0.0225,384,True
